@@ -2,11 +2,12 @@
 """
 Created on Sun Feb  2 11:24:42 2014
 
-@author: YOUR NAME HERE
+@author: Cecelia Auerswald
 """
 
 # you may find it useful to import these variables (although you are not required to use them)
 from amino_acids import aa, codons
+from random import shuffle
 
 def collapse(L):
     """ Converts a list of strings to a string by concatenating all elements of the list """
@@ -25,14 +26,27 @@ def coding_strand_to_AA(dna):
         returns: a string containing the sequence of amino acids encoded by the
                  the input DNA fragment
     """
-    
+    codon = ""
+    proteins = ""
+    for i in range(len(dna)): #looking at each of the letters
+        codon += dna[i]
+        if (i+1)%3==0: #if we have collected a full codon in the string codon
+            for c in codons: 
+                if codon in c: #check all possible codons for a match
+                    proteins = proteins + aa[codons.index(c)]
+            codon = "" #reset codon to check next set of three letters
+    return proteins
+            
+        
     # YOUR IMPLEMENTATION HERE
 
 def coding_strand_to_AA_unit_tests():
     """ Unit tests for the coding_strand_to_AA function """
+
+    print "input: TTT, expected output: F , actual output: "+coding_strand_to_AA("TTT")
+    print "input: ACTGTCAAT, expected output: TVN , actual output: "+coding_strand_to_AA("ACTGTCAAT")
         
     # YOUR IMPLEMENTATION HERE
-
 def get_reverse_complement(dna):
     """ Computes the reverse complementary sequence of DNA for the specfied DNA
         sequence
@@ -40,12 +54,24 @@ def get_reverse_complement(dna):
         dna: a DNA sequence represented as a string
         returns: the reverse complementary DNA sequence represented as a string
     """
-    
-    # YOUR IMPLEMENTATION HERE
-    
+    dna_list = list(dna)
+    for i in range(len(dna)): #get the complement of each nucleotide 
+        n=dna_list[i]
+        if n == 'A':
+            dna_list[i]='T'
+        elif n == 'T':
+            dna_list[i]='A'
+        elif n=='C':
+            dna_list[i] = 'G'
+        elif n=='G':
+            dna_list[i] = 'C'
+    dna_list.reverse() #reverse the list of complementary nucleotides
+    return ''.join(dna_list)
+
 def get_reverse_complement_unit_tests():
     """ Unit tests for the get_complement function """
-        
+    print "input: ATGCCCGCTTT, expected output: AAAGCGGGCAT , actual output: "+ get_reverse_complement("ATGCCCGCTTT")
+    print "input: CCGCGTTCA, expected output: TGAACGCGG , actual output: "+ get_reverse_complement("CCGCGTTCA")
     # YOUR IMPLEMENTATION HERE    
 
 def rest_of_ORF(dna):
@@ -56,12 +82,23 @@ def rest_of_ORF(dna):
         dna: a DNA sequence
         returns: the open reading frame represented as a string
     """
-    
+    codon = ""
+    for i in range(len(dna)): #looking at each of the letters
+        codon += dna[i]
+        if (i+1)%3==0: #if we have collected a full codon in the string codon
+            if codon in ['TAG', 'TAA','TGA']: #check if codon in frame stop coding
+                return dna[:i-2] #if so, return string up to that point
+            codon=''
+    return dna #if not stop codons found, return whole string
     # YOUR IMPLEMENTATION HERE
 
 def rest_of_ORF_unit_tests():
     """ Unit tests for the rest_of_ORF function """
-        
+    print "input: ATGTGAA, expected output: ATG , actual output: "+ rest_of_ORF("ATGTGAA")
+    print "input: ATGAGATAGG, expected output: ATGAGA, actual output: "+ rest_of_ORF("ATGAGATAGG")
+    print "input: ATGGGGAGCTTG, expected output: ATGGGGAGCTTG, actual output: "+ rest_of_ORF("ATGGGGAGCTTG")
+    
+    
     # YOUR IMPLEMENTATION HERE
         
 def find_all_ORFs_oneframe(dna):
@@ -74,12 +111,26 @@ def find_all_ORFs_oneframe(dna):
         dna: a DNA sequence
         returns: a list of non-nested ORFs
     """
-     
+    codon=''
+    allORFs=[]
+    i=0
+    while i<len(dna): #look through letters in dna sequence
+        codon+=dna[i]
+        if (i+1)%3==0:
+            if codon=="ATG": #check for start codon
+                allORFs.append(rest_of_ORF(dna[i-2:])) #if ORF found, add to list of ORFs
+                i+=len(rest_of_ORF(dna[i-2:]))-3 #jump to end of that ORF in dna sequence
+            codon = ''
+        i+=1
+    return allORFs
     # YOUR IMPLEMENTATION HERE        
      
 def find_all_ORFs_oneframe_unit_tests():
     """ Unit tests for the find_all_ORFs_oneframe function """
 
+    print "input: ATGCATGAATGTAGATAGATGTGCCC, expected output: ['ATGCATGAATGTAGA', 'ATGTGCCC'] , actual output: "+ str(find_all_ORFs_oneframe("ATGCATGAATGTAGATAGATGTGCCC"))
+    print "input: ATGTGCATGAGATAGGATGGGATGCTTG, expected output: ['ATGTGCATGAGA', 'ATGCTTG'], actual output: "+ str(find_all_ORFs_oneframe("ATGTGCATGAGATAGGATGGGATGCTTG"))
+    
     # YOUR IMPLEMENTATION HERE
 
 def find_all_ORFs(dna):
@@ -91,12 +142,17 @@ def find_all_ORFs(dna):
         dna: a DNA sequence
         returns: a list of non-nested ORFs
     """
-     
+    return find_all_ORFs_oneframe(dna) + find_all_ORFs_oneframe(dna[1:])+find_all_ORFs_oneframe(dna[2:])
+    
+        
     # YOUR IMPLEMENTATION HERE
 
 def find_all_ORFs_unit_tests():
     """ Unit tests for the find_all_ORFs function """
-        
+      
+    print "input: ATGCATGAATGTAG, expected output: ['ATGCATGAATGTAG', 'ATGAATGTAG', 'ATG'] , actual output: "+ str(find_all_ORFs("ATGCATGAATGTAGATAGATGTGCCC"))
+    print "input: ATGTGCATGAGATAGGATGGGATGCTTG, expected output: ['ATGTGCATGAGA', 'ATGCTTG', 'ATGGGATGCTTG'], actual output: "+ str(find_all_ORFs("ATGTGCATGAGATAGGATGGGATGCTTG"))
+    
     # YOUR IMPLEMENTATION HERE
 
 def find_all_ORFs_both_strands(dna):
@@ -106,23 +162,34 @@ def find_all_ORFs_both_strands(dna):
         dna: a DNA sequence
         returns: a list of non-nested ORFs
     """
-     
+    
+    return find_all_ORFs(dna) + find_all_ORFs(get_reverse_complement(dna))
     # YOUR IMPLEMENTATION HERE
 
 def find_all_ORFs_both_strands_unit_tests():
     """ Unit tests for the find_all_ORFs_both_strands function """
-
+    
+    print "input: ATGCGAATGTAGCATCAAA, expected output: ['ATGCGAATG', 'ATGCTACATTCGCAT'] , actual output: "+ str(find_all_ORFs_both_strands("ATGCATGAATGTAGATAGATGTGCCC"))
+    print "input: ATGTGCATGAGATAGGATGGGATGCTTG, expected output: ['ATGTGCATGAGA', 'ATGCTTG', 'ATGGGATGCTTG', 'ATGCACAT'], actual output: "+ str(find_all_ORFs_both_strands("ATGTGCATGAGATAGGATGGGATGCTTG"))
+    
     # YOUR IMPLEMENTATION HERE
 
 def longest_ORF(dna):
     """ Finds the longest ORF on both strands of the specified DNA and returns it
         as a string"""
-
+    ORFs = find_all_ORFs_both_strands(dna)
+    longest_orf = ''
+    for orf in ORFs:
+        if len(orf)>len(longest_orf):
+            longest_orf=orf
+    return longest_orf
     # YOUR IMPLEMENTATION HERE
 
 def longest_ORF_unit_tests():
     """ Unit tests for the longest_ORF function """
-
+    
+    print "input: ATGCGAATGTAGCATCAAA, expected output: 'ATGCTACATTCGCAT', actual output: "+ str(longest_ORF("ATGCGAATGTAGCATCAAA"))
+    
     # YOUR IMPLEMENTATION HERE
 
 def longest_ORF_noncoding(dna, num_trials):
@@ -132,7 +199,15 @@ def longest_ORF_noncoding(dna, num_trials):
         dna: a DNA sequence
         num_trials: the number of random shuffles
         returns: the maximum length longest ORF """
-
+    longest_orf = ''
+    dna_list = list(dna)
+    for i in range(num_trials):
+        shuffle(dna_list)
+        orf = longest_ORF(collapse(dna_list))
+        if len(orf)>len(longest_orf):
+            longest_orf = orf
+    return len(longest_orf)
+        
     # YOUR IMPLEMENTATION HERE
 
 def gene_finder(dna, threshold):
@@ -145,5 +220,20 @@ def gene_finder(dna, threshold):
         returns: a list of all amino acid sequences whose ORFs meet the minimum
                  length specified.
     """
-
+    aa_seqs = []
+    
+    orfs = find_all_ORFs_both_strands(dna)
+    orfs.sort(key=len, reverse=True)
+    for orf in orfs:
+        if len(orf)<=threshold:
+            break
+        aa_seqs.append(coding_strand_to_AA(orf))
+    return aa_seqs
+    
+    
+    
+    
+    
+    
+    
     # YOUR IMPLEMENTATION HERE

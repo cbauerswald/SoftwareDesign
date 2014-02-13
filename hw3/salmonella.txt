@@ -1,0 +1,13 @@
+result 1:
+surface presentation of antigens [Salmonella enterica subsp. enterica serovar Typhimurium]
+
+result 2:	
+surface presentation of antigens protein SpaO [Salmonella enterica subsp. enterica serovar Typhimurium str. LT2] >ref|YP_005233880.1| surface presentation of antigens protein....
+
+result 3:
+needle length control protein [Salmonella enterica subsp. enterica serovar Typhimurium str. LT2] >ref|YP_005233881.1| surface presentation of antigens protein (associated with type III...
+
+result 4:
+surface presentation of antigens protein SpaS [Salmonella enterica subsp. enterica serovar Typhimurium str. LT2] >ref|YP_001589764.1| surface presentation of antigens protein SpaS 
+
+

@@ -12,9 +12,10 @@ def get_doubles_then_triples(L):
     return get_multiple_of_list(L,2) + get_multiple_of_list(L,3)
 
 def get_multiple_of_list(L,n):
+    multL = []
     for i in range(len(L)):
-        L[i] *= n
-    return L
+        multL.append( L[i]*n)
+    return multL
 
 if __name__ == '__main__':
     print get_doubles_then_triples([1, 4, 8])
